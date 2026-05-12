@@ -1,0 +1,71 @@
+# Docker Compose
+version: '3.3'
+
+# Define services
+services:
+
+  # Spring service
+  spring:
+    image: ams2024
+    ports:
+      - "8181:8081"
+    container_name: spring_cont
+
+    depends_on:
+      - database
+
+    restart: always
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/dbams2024?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: sip
+      SPRING_DATASOURCE_PASSWORD: sip-ac2024
+
+    networks:
+      - spr_net
+
+  # Database Service (MySQL)
+  database:
+    image: mysql:latest
+    container_name: mysql_cont
+
+    volumes:
+      - db_ams_vol:/var/lib/mysql
+
+    restart: always
+
+    environment:
+      MYSQL_DATABASE: dbams2024
+      MYSQL_USER: sip
+      MYSQL_PASSWORD: sip-ac2024
+      MYSQL_ROOT_PASSWORD: root
+
+    networks:
+      - spr_net
+
+  # phpMyAdmin Service
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: pmadmin_cont
+
+    depends_on:
+      - database
+
+    restart: always
+
+    ports:
+      - "8083:80"
+
+    environment:
+      - PMA_ARBITRARY=1
+
+    networks:
+      - spr_net
+
+# Volumes
+volumes:
+  db_ams_vol:
+
+# Networks
+networks:
+  spr_net:
